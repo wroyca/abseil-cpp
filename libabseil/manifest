@@ -1,0 +1,16 @@
+: 1
+name: libabseil
+version: 2025.127.2
+language: c++
+project: abseil-cpp
+summary: Abseil - C++ Common Libraries
+license: Apache-2.0
+description-file: README.md
+package-description-file: PACKAGE-README.md
+url: https://github.com/abseil/abseil-cpp
+email: abseil-io@googlegroups.com
+package-url: https://github.com/build2-packaging/abseil-cpp
+package-email: packaging@build2.org ; Mailing list.
+depends: * build2 >= 0.18.0
+depends: * bpkg >= 0.18.0
+tests: libabseil-tests == $

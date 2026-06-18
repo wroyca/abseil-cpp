@@ -1,0 +1,6 @@
+$out_root/
+{
+  include absl/
+}
+
+export $out_root/absl/$import.target

@@ -1,0 +1,12 @@
+import libs = libabseil%liba{abseil}
+import libs += gtest%lib{gtest}
+import libs += gmock%lib{gmock}
+
+# The upstream Abseil unit tests depend on GoogleTest, which is why they live
+# in this separate package (see the packaging guide: tests with extra
+# dependencies).
+#
+exe{driver}: cxx{driver} cxx{**_test} $libs
+
+# The absl/ and gtest/ headers come from the imported libraries' exported
+# preprocessor options, so no local include search paths are needed.

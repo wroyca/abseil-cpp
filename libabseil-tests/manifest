@@ -1,0 +1,15 @@
+: 1
+name: libabseil-tests
+version: 2025.127.2
+language: c++
+project: abseil-cpp
+summary: Abseil tests
+license: Apache-2.0
+description-file: README.md
+url: https://github.com/abseil/abseil-cpp
+email: abseil-io@googlegroups.com
+depends: * build2 >= 0.18.0
+depends: * bpkg >= 0.18.0
+depends: libabseil == $
+depends: gtest ^1.11.0
+depends: gmock ^1.11.0

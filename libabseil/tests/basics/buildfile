@@ -1,0 +1,3 @@
+import libs = libabseil%liba{abseil}
+
+exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}

@@ -1,0 +1,47 @@
+# This is a good default: files that are auto-detected by git to be text are
+# converted to the platform-native line ending (LF on Unix, CRLF on Windows)
+# in the working tree and to LF in the repository.
+#
+* text=auto
+
+# Use `eol=crlf` for files that should have the CRLF line ending both in the
+# working tree (even on Unix) and in the repository.
+#
+#*.bat text eol=crlf
+
+# Use `eol=lf` for files that should have the LF line ending both in the
+# working tree (even on Windows) and in the repository.
+#
+#*.sh text eol=lf
+
+# Use `binary` to make sure certain files are never auto-detected as text.
+#
+#*.png binary
+
+# The libabseil package overlays the upstream absl/ component directories with
+# directory symlinks. On Windows git must be told the symlink type explicitly
+# (otherwise it cannot reliably check them out, since the target lives in the
+# upstream submodule and may not exist at checkout time). See "Symlinks and
+# Windows" for details.
+#
+libabseil/absl/algorithm symlink=dir
+libabseil/absl/base symlink=dir
+libabseil/absl/cleanup symlink=dir
+libabseil/absl/container symlink=dir
+libabseil/absl/crc symlink=dir
+libabseil/absl/debugging symlink=dir
+libabseil/absl/flags symlink=dir
+libabseil/absl/functional symlink=dir
+libabseil/absl/hash symlink=dir
+libabseil/absl/log symlink=dir
+libabseil/absl/memory symlink=dir
+libabseil/absl/meta symlink=dir
+libabseil/absl/numeric symlink=dir
+libabseil/absl/profiling symlink=dir
+libabseil/absl/random symlink=dir
+libabseil/absl/status symlink=dir
+libabseil/absl/strings symlink=dir
+libabseil/absl/synchronization symlink=dir
+libabseil/absl/time symlink=dir
+libabseil/absl/types symlink=dir
+libabseil/absl/utility symlink=dir

@@ -1,0 +1,137 @@
+intf_libs = # Interface dependencies.
+impl_libs = # Implementation dependencies.
+
+# Abseil is built as a single library. Exclude upstream tests, benchmarks,
+# mocks, code-generation tools, and the GoogleTest-based status matchers
+# (all of which are testonly or not meant to be part of the library binary).
+#
+lib{abseil}: libul{abseil}: {hxx cxx}{**          \
+  -**test**                                       \
+  -**benchmark**                                  \
+  -**mock**                                       \
+  -**gentables**                                  \
+  -**fuzz**                                       \
+  -**status_matchers**                            \
+  -**chi_square**                                 \
+  -**print_hash_of}                               \
+  $impl_libs $intf_libs
+
+libs{abseil}: def{abseil}: include = ($cxx.target.system == 'win32-msvc')
+def{abseil}: libul{abseil}
+
+# Build options.
+#
+cxx.poptions =+ "-I$src_root"
+
+# Stop <windows.h> from defining the min/max function-like macros (which
+# break std::numeric_limits<>::max()/min() in the sources) and apply
+# Abseil's standard define/warning configuration (matching upstream's
+# ABSL_MSVC_FLAGS).
+#
+if ($cxx.target.class == 'windows')
+{
+  cxx.poptions += -DNOMINMAX -DWIN32_LEAN_AND_MEAN
+
+  # MSVC-ABI CRT defines (also fine for clang targeting MSVC).
+  #
+  if ($cxx.target.system != 'mingw32')
+    cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS \
+                    -D_ENABLE_EXTENDED_ALIGNED_STORAGE
+
+  # MSVC command-line (cl/clang-cl) warning configuration. Guard on the
+  # compiler class so we don't pass /-style options to a GCC-style driver
+  # (e.g. clang++ targeting MSVC).
+  #
+  if ($cxx.class == 'msvc')
+    cxx.coptions += /bigobj /wd4005 /wd4068 /wd4180 /wd4244 /wd4267 \
+                    /wd4503 /wd4800
+}
+
+# The AES-NI hardware-accelerated random backend uses x86 ISA intrinsics
+# that must be enabled at compile time (matching upstream's per-file
+# ABSL_RANDOM_RANDEN_COPTS).
+#
+if ($cxx.target.cpu == 'x86_64' || $cxx.target.cpu == 'i386')
+  {obja objs}{random/internal/randen_hwaes}: cxx.coptions += -maes -msse4.1
+
+# System libraries.
+#
+switch $cxx.target.class
+{
+  case 'windows'
+  {
+    if ($cxx.target.system == 'mingw32')
+      cxx.libs += -ladvapi32 -lbcrypt -ldbghelp
+    else
+      cxx.libs += advapi32.lib bcrypt.lib dbghelp.lib
+  }
+  case 'macos'
+  {
+    # cctz's time_zone_lookup uses CoreFoundation to resolve the local time
+    # zone on Apple platforms.
+    #
+    cxx.libs += -lpthread
+    cxx.libs += -framework CoreFoundation
+  }
+  default
+    cxx.libs += -lpthread
+}
+
+if ($cxx.target.system == 'mingw32')
+  cxx.loptions += -Wl,--export-all-symbols
+
+# Export options.
+#
+lib{abseil}:
+{
+  cxx.export.poptions = "-I$src_root"
+  cxx.export.libs = $intf_libs
+}
+
+# Abseil's MSVC-ABI DLL configuration is not a configuration we can
+# support with packaging glue alone.
+#
+# There are two separate issues. First, several Abseil components rely
+# on process-wide globals crossing the DLL boundary correctly (for
+# example the SwissTable sentinel state). If those globals are
+# duplicated between the DLL and its consumers, the library can fail at
+# runtime with SwissTable "full table!" aborts. Second, the automatic
+# MSVC .def export path sees cctz's /alternatename weak-alias linker
+# directive as if it were an exportable symbol, which link.exe rejects
+# with LNK1242.
+#
+# We could special-case the generated .def and filter or patch the
+# weak-alias entry, as some build systems/packages do, but that would
+# only address the link-time symptom. It would still leave us
+# maintaining a fragile MSVC DLL configuration for a library whose
+# Windows shared-library support is not a primary upstream use case.
+#
+# Therefore, with the MSVC ABI, build Abseil as a static library only.
+# This is also the variant normally consumed by MSVC-ABI users. Note
+# that exceptionally, MinGW uses a different export/link path and is
+# left free to build shared libraries.
+#
+if ($cxx.target.system == 'win32-msvc')
+  lib{abseil}: bin.lib = static
+
+# For pre-releases use the complete version to make sure they cannot
+# be used in place of another pre-release or the final version. See
+# the version module for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{abseil}: bin.lib.version = "-$version.project_id"
+else
+  lib{abseil}: bin.lib.version = "-$version.major.$version.minor"
+
+# Some public headers textually include .inc files (e.g. numeric/int128.h).
+#
+lib{abseil}: inc{** -**test**}
+
+# Install headers (and the .inc textual includes) into the absl/ subdirectory
+# of, say, /usr/include/ recreating subdirectories.
+#
+{hxx inc}{*}:
+{
+  install         = include/absl/
+  install.subdirs = true
+}

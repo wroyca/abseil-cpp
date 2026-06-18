@@ -1,0 +1,19 @@
+# Uncomment to suppress warnings coming from external libraries.
+#
+#cxx.internal.scope = current
+
+cxx.std = latest
+
+using cxx
+
+hxx{*}: extension = h
+cxx{*}: extension = cc
+
+# Abseil uses .inc files for textual includes.
+#
+define inc: file
+inc{*}: extension = inc
+
+# The test target for cross-testing (running tests under Wine, etc).
+#
+test.target = $cxx.target

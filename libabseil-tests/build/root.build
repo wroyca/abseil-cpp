@@ -1,0 +1,15 @@
+# Uncomment to suppress warnings coming from external libraries.
+#
+#cxx.internal.scope = current
+
+cxx.std = latest
+
+using cxx
+
+hxx{*}: extension = h
+cxx{*}: extension = cc
+
+# Every exe{} in this package is a test and is not installed.
+#
+exe{*}: test = true
+exe{*}: install = false
