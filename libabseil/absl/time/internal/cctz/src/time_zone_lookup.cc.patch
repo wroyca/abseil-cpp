@@ -1,0 +1,27 @@
+--- time_zone_lookup.cc.orig	2026-06-21 11:39:01.437855356 -0400
++++ time_zone_lookup.cc	2026-06-21 11:46:32.071640597 -0400
+@@ -36,10 +36,20 @@
+ #include <sdkddkver.h>
+ // Include only when the SDK is for Windows 10 (and later), and the binary is
+ // targeted for Windows XP and later.
+-// Note: The Windows SDK added windows.globalization.h file for Windows 10, but
+-// MinGW did not add it until NTDDI_WIN10_NI (SDK version 10.0.22621.0).
+-#if ((defined(_WIN32_WINNT_WIN10) && !defined(__MINGW32__)) ||        \
+-     (defined(NTDDI_WIN10_NI) && NTDDI_VERSION >= NTDDI_WIN10_NI)) && \
++//
++// This is intentionally NOT enabled for MinGW. MinGW added
++// windows.globalization.h at NTDDI_WIN10_NI (SDK version 10.0.22621.0), but the
++// mingw-w64 headers of that generation (e.g. v13) contain a bug in
++// windows.foundation.h: both IReference<BYTE> and IReference<boolean> are
++// emitted as explicit specializations, yet BYTE and boolean are both typedefs
++// for `unsigned char`, so the two specializations collide as
++// IReference<unsigned char> and the compiler reports a redefinition. As a
++// result, any C++ translation unit that includes windows.globalization.h
++// (which pulls in windows.foundation.h) fails to compile under MinGW. Since
++// this is a system-header bug we cannot work around cleanly from here, MinGW
++// stays on the generic ${TZ} / "/etc/localtime" fallback used by
++// local_time_zone() below.
++#if (defined(_WIN32_WINNT_WIN10) && !defined(__MINGW32__)) && \
+     (_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+ #define USE_WIN32_LOCAL_TIME_ZONE
+ #include <roapi.h>

@@ -42,6 +42,10 @@ libabseil/absl/random symlink=dir
 libabseil/absl/status symlink=dir
 libabseil/absl/strings symlink=dir
 libabseil/absl/synchronization symlink=dir
-libabseil/absl/time symlink=dir
+# absl/time/ is broken out into a real directory tree so that
+# time_zone_lookup.cc can be patched individually (see that file's .orig/.patch
+# next to it). Only the remaining directory symlinks under it need declaring.
+libabseil/absl/time/internal/cctz/include symlink=dir
+libabseil/absl/time/internal/cctz/testdata symlink=dir
 libabseil/absl/types symlink=dir
 libabseil/absl/utility symlink=dir
