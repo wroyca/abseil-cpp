@@ -1,0 +1,7 @@
+: 1
+name: libabseil-tests
+version: 2025.127.2+1
+language: c++
+project: abseil-cpp
+summary: Abseil tests
+license: Apache-2.0
